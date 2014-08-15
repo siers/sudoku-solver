@@ -5,9 +5,8 @@ import Solver
 
 (>$>) = flip fmap
 
-representSnoop :: ([Point Int], SBoard) -> String
-representSnoop (p, b) = show p ++ "\n" ++ showB b ++ "\n"
+representLog :: ([Point Int], SBoard) -> String
+representLog (p, b) = show p ++ "\n" ++ showB b ++ "\n"
 
 -- ./main < sudoku
-main = getContents >$> boardS >>= mapM (putStrLn . representSnoop) . solve . (,) []
--- main = getContents >$> boardS >>= mapM (putStrLn . (++"\n") . showB) . convergerate trivializer
+main = getContents >$> boardS >>= mapM (putStrLn . representLog) . solve . (,) []

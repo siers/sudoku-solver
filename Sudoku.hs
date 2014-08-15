@@ -40,10 +40,6 @@ boardS = board . map read . words
 boardOf :: a -> Board a
 boardOf = flip mapB (board []) . const
 
-frees :: SSlots
-frees = tnr . tnr $ [1..9]
-    where tnr = take 9 . repeat
-
 poses :: Board Pos
 poses = map (flip map [0..8] . (,)) [0..8]
 
@@ -51,8 +47,6 @@ poses = map (flip map [0..8] . (,)) [0..8]
 mapB :: (a -> b) -> Board a -> Board b
 mapB = map . map
 
-withBoard :: Board a -> (Board a -> Pos -> Line b) -> (Int -> Pos) -> Board b
-withBoard board mfyer argifyer = map (mfyer board . argifyer) [0..8]
 
 showB :: Show a => Board a -> String
 showB = spacify "\n" . map (spacify " ") . mapB show
@@ -61,7 +55,7 @@ showB = spacify "\n" . map (spacify " ") . mapB show
 zipB :: [[a]] -> [[b]] -> [[(a, b)]]
 zipB = zipWith zip
 
--- Transformers
+-- Line getters
 horizontal :: Board a -> Pos -> Line a
 horizontal b (h, _) = b !! h
 
@@ -72,6 +66,7 @@ square :: Board a -> Pos -> Line a
 square b (x, y) = map ((!!) . (b!!)) (sqLine $ div x 3) <*> (sqLine $ div y 3)
     where sqLine segment = map (+segment*3) [0..2]
 
+-- Homomorphisms
 horizontals :: Board a -> Board a
 horizontals = id
 
@@ -80,27 +75,25 @@ verticals = transpose
 
 squares :: Board a -> Board a
 squares b = withBoard b square toPos
-    where toPos = ((*3) *** (*3)) . swap . flip divMod 3
+    where
+        toPos = ((*3) *** (*3)) . swap . flip divMod 3
+        withBoard b f argf = map (f b . argf) [0..8]
+
+-- Point related stuff.
+cells :: Board a -> Board (Point a)
+cells = zipB poses
 
 implement :: Board a -> Point a -> Board a
 implement b ((x, y), v) = b & ix x . ix y .~ v
 
--- squares . squares . squares == id
--- verticals . verticals == id
--- iterate (Board a -> Board a) (Board a) !! 6 == id
-
-cells :: Board a -> Board (Point a)
-cells = zipB poses
-
--- Board (n x n) a -> Pos -> Board (n x 3) a
-choices :: Board a -> Pos -> Board a
-choices b pos = map (($pos) . ($b)) [horizontal, vertical, square]
-
+-- Slots and data for solving.
 unify :: SSlots3 -> SSlots
 unify = mapB $ ([1..9] \\) . concat
 
 takens :: Board a -> Slots3 a
 takens b = mapB (choices b) $ poses
+    where
+        choices b pos = map (($pos) . ($b)) [horizontal, vertical, square]
 
 slots :: SBoard -> SSlots
 slots = unify . takens
