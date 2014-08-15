@@ -8,13 +8,12 @@ import Control.Arrow
 import Control.Lens
 
 type Pos      = (Int, Int)
-type Point a = (Pos, a)
+type Point a  = (Pos, a)
+type Points a = [Point a] -- Numbers to be implemented into board.
 
 -- Board should be a matrix, but not obligatory a square one.
 type Line a   = [a]
 type Board a  = [Line a]
-
-type Points a = [Point a] -- Numbers to be implemented into board.
 
 type Slots a  = Board (Line a)  -- slots of unified h/v/s
 type Slots3 a = Board (Board a) -- slots of h/v/s

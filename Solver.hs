@@ -48,11 +48,14 @@ trivialized b = concatMap trivialities . streams $ possibs
     where
         possibs = cells . unify . takens $ b
 
-trivializer :: SBoard -> SBoard
-trivializer b =
+snoopTrivializer :: ([Point Int], SBoard) -> ([Point Int], SBoard)
+snoopTrivializer (_, b) =
     if length (trivialized b) /= 0
-    then implement b . head . trivialized $ b
-    else b
+    then (nub . trivialized $ b, implement b . head . trivialized $ b)
+    else ([], b)
+
+trivializer :: SBoard -> SBoard
+trivializer = snd . curry snoopTrivializer undefined
 
 trivialize :: SBoard -> SBoard
 trivialize = converge trivializer
@@ -63,4 +66,4 @@ converge = until =<< ((==) =<<)
 convergerate :: Eq a => (a -> a) -> a -> [a]
 convergerate f i = takeWhile (/= (converge f i)) $ iterate f i
 
-solve = convergerate trivialize
+solve = convergerate snoopTrivializer
