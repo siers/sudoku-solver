@@ -5,24 +5,41 @@ import Data.Tuple
 import Data.List
 import Control.Applicative
 import Control.Arrow
+import Control.Lens
 
+type Pos      = (Int, Int)
+type Point a = (Pos, a)
+
+-- Board should be a matrix, but not obligatory a square one.
 type Line a   = [a]
 type Board a  = [Line a]
+
+type Points a = [Point a] -- Numbers to be implemented into board.
+
 type Slots a  = Board (Line a)  -- slots of unified h/v/s
 type Slots3 a = Board (Board a) -- slots of h/v/s
 
+-- L = Lattice
+type LSlots a = Board (Point (Line a))
+
 type SLine    = Line Int
 type SBoard   = Board Int
-type SSlots   = Slots Int  -- slots of unified h/v/s
-type SSlots3  = Slots3 Int -- slots of h/v/s
-type Pos      = (Int, Int)
+type SSlots   = Slots Int
+type SSlots3  = Slots3 Int
+type SLSlots  = LSlots Int
 
 -- Constructors
-board :: String -> SBoard
-board = chunksOf 9 . take 81 . (++ repeat 0) . map read . words
+board :: [Int] -> SBoard
+board = boardFrom 0
+
+boardFrom :: a -> [a] -> Board a
+boardFrom filling = chunksOf 9 . take 81 . (++ repeat filling)
+
+boardS :: String -> SBoard
+boardS = board . map read . words
 
 boardOf :: a -> Board a
-boardOf = flip mapB (board "") . const
+boardOf = flip mapB (board []) . const
 
 frees :: SSlots
 frees = tnr . tnr $ [1..9]
@@ -45,7 +62,7 @@ showB = spacify "\n" . map (spacify " ") . mapB show
 zipB :: [[a]] -> [[b]] -> [[(a, b)]]
 zipB = zipWith zip
 
--- Accessors
+-- Transformers
 horizontal :: Board a -> Pos -> Line a
 horizontal b (h, _) = b !! h
 
@@ -56,21 +73,27 @@ square :: Board a -> Pos -> Line a
 square b (x, y) = map ((!!) . (b!!)) (sqLine $ div x 3) <*> (sqLine $ div y 3)
     where sqLine segment = map (+segment*3) [0..2]
 
--- Transformers
 horizontals :: Board a -> Board a
-horizontals b = withBoard b horizontal (flip (,) 0)
+horizontals = id
 
--- Transformers
 verticals :: Board a -> Board a
-verticals b = withBoard b horizontal ((,) 0)
+verticals = transpose
 
 squares :: Board a -> Board a
 squares b = withBoard b square toPos
     where toPos = ((*3) *** (*3)) . swap . flip divMod 3
 
-cells :: Board a -> Board (Pos, a)
+implement :: Board a -> Point a -> Board a
+implement b ((x, y), v) = b & ix x . ix y .~ v
+
+-- squares . squares . squares == id
+-- verticals . verticals == id
+-- iterate (Board a -> Board a) (Board a) !! 6 == id
+
+cells :: Board a -> Board (Point a)
 cells = zipB poses
 
+-- Board (n x n) a -> Pos -> Board (n x 3) a
 choices :: Board a -> Pos -> Board a
 choices b pos = map (($pos) . ($b)) [horizontal, vertical, square]
 
@@ -79,3 +102,9 @@ unify = mapB $ ([1..9] \\) . concat
 
 takens :: Board a -> Slots3 a
 takens b = mapB (choices b) $ poses
+
+slots :: SBoard -> SSlots
+slots = unify . takens
+
+streams :: Board a -> Line (Board a)
+streams b = map ($ b) [horizontals, verticals, squares]

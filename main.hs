@@ -2,17 +2,9 @@ import System.Environment
 import Sudoku
 import Solver
 
-choice' :: String -> Board -> Int -> Line
-choice' fun
-    | fun == "h" = horizontal
-    | fun == "v" = vertical
-    | fun == "s" = (. squareFind) . square
-    | otherwise  = error "argument missing: h | v |s"
+(>$>) = flip fmap
 
-choice (action:arg:_) = (`fun` (read arg))
-    where fun = (choice' action)
+b = boardS "0 0 0 9 4 2 5 1 0 5 9 0 0 0 0 0 6 2 1 0 7 0 0 8 4 0 9 0 0 0 0 8 0 0 2 0 0 4 0 1 0 5 0 8 0 0 1 0 0 7 0 0 0 0 8 0 1 3 0 0 2 0 4 4 7 0 0 0 0 0 9 1 0 5 3 2 1 4 0 0 0"
 
-operate :: [String] -> String -> Line
-operate = (. board) . choice
-
-main = ((`fmap` getContents) . operate =<< getArgs) >>= putStrLn . show . solve
+-- ./main < sudoku
+main = getContents >$> boardS >>= mapM (putStrLn . (++"\n") . showB) . convergerate trivializer
