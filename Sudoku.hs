@@ -93,6 +93,14 @@ on b (x, y) = b !! x !! y
 unify :: SSlots3 -> SSlots -- Board FieldsTakenIn3 -> Board FieldsNotTaken
 unify = mapB $ ([1..9] \\) . concat
 
+takenless :: SBoard -> SSlots -> SSlots
+takenless b = mapB decide . cells
+    where
+        decide (pos, slots) =
+            if   b `on` pos == 0
+            then slots
+            else []
+
 streamMap :: Board a -> Slots3 a
 streamMap b = mapB choices poses
     where

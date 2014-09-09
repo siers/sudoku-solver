@@ -28,7 +28,7 @@ trivialized :: SBoard -> [Point Int]
 trivialized = concatMap trivialities . streams . possibs
 
 possibs :: SBoard -> SLSlots
-possibs = cells . slots
+possibs = cells . (flip takenless =<< slots)
 
 logTrivialize :: ([Point Int], SBoard) -> ([Point Int], SBoard)
 logTrivialize (_, b) =
