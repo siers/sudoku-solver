@@ -29,14 +29,14 @@ trivialized b = concatMap trivialities . streams $ possibs
     where
         possibs = cells . unify . takens $ b
 
-logTrivializer :: ([Point Int], SBoard) -> ([Point Int], SBoard)
-logTrivializer (_, b) =
+logTrivialize :: ([Point Int], SBoard) -> ([Point Int], SBoard)
+logTrivialize (_, b) =
     if length (trivialized b) /= 0
     then (nub . trivialized $ b, implement b . head . trivialized $ b)
     else ([], b)
 
 trivialize :: SBoard -> SBoard
-trivialize = snd . curry logTrivializer undefined
+trivialize = snd . curry logTrivialize undefined
 
 converge :: Eq a => (a -> a) -> a -> a
 converge = until =<< ((==) =<<)
@@ -45,4 +45,4 @@ convergerate :: Eq a => (a -> a) -> a -> [a]
 convergerate f i = takeWhile (/= (converge f i)) $ iterate f i
 
 -- Converge and preserve iterations.
-solve = convergerate logTrivializer
+solve = convergerate logTrivialize
