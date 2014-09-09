@@ -16,7 +16,7 @@ uniq = map snd . filter ((==1) . fst) . frequency . concat
 -- Ord type restriction could is not needed for functionality, just for laziness.
 -- Checks for unique numbers in lines of h/v/s boards, retrieves them as Target Int.
 trivialities :: Ord a => LSlots a -> [Point a]
-trivialities = concatMap (targets) . align
+trivialities = concatMap targets . align
     where
         align           = zip =<< simples
         simples         = map (uniq . map snd)
@@ -25,9 +25,10 @@ trivialities = concatMap (targets) . align
         targets         = catMaybes . map (fmap (second head) . sample) . uncurry allowed
 
 trivialized :: SBoard -> [Point Int]
-trivialized b = concatMap trivialities . streams $ possibs
-    where
-        possibs = cells . unify . takens $ b
+trivialized = concatMap trivialities . streams . possibs
+
+possibs :: SBoard -> SLSlots
+possibs = cells . slots
 
 logTrivialize :: ([Point Int], SBoard) -> ([Point Int], SBoard)
 logTrivialize (_, b) =
@@ -42,7 +43,7 @@ converge :: Eq a => (a -> a) -> a -> a
 converge = until =<< ((==) =<<)
 
 convergerate :: Eq a => (a -> a) -> a -> [a]
-convergerate f i = takeWhile (/= (converge f i)) $ iterate f i
+convergerate f i = (takeWhile (/= (converge f i)) $ iterate f i) ++ [converge f i]
 
 -- Converge and preserve iterations.
 solve = convergerate logTrivialize

@@ -86,17 +86,20 @@ cells = zipB poses
 implement :: Board a -> Point a -> Board a
 implement b ((x, y), v) = b & ix x . ix y .~ v
 
+on :: Board a -> Pos -> a
+on b (x, y) = b !! x !! y
+
 -- Slots and data for solving.
-unify :: SSlots3 -> SSlots
+unify :: SSlots3 -> SSlots -- Board FieldsTakenIn3 -> Board FieldsNotTaken
 unify = mapB $ ([1..9] \\) . concat
 
-takens :: Board a -> Slots3 a
-takens b = mapB (choices b) $ poses
+streamMap :: Board a -> Slots3 a
+streamMap b = mapB choices poses
     where
-        choices b pos = map (($pos) . ($b)) [horizontal, vertical, square]
+        choices pos = map (($ (b, pos)) . uncurry) [horizontal, vertical, square]
 
 slots :: SBoard -> SSlots
-slots = unify . takens
+slots = unify . streamMap
 
 streams :: Board a -> Line (Board a)
 streams b = map ($ b) [horizontals, verticals, squares]
