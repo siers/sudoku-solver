@@ -9,6 +9,7 @@ import Control.Lens
 
 type Pos      = (Int, Int)
 type Point a  = (Pos, a)
+type SPoint   = (Pos, Int)
 type Points a = [Point a] -- Numbers to be implemented into board.
 
 -- Board should be a matrix, but not obligatory a square one.
@@ -107,7 +108,7 @@ streamMap b = mapB choices poses
         choices pos = map (($ (b, pos)) . uncurry) [horizontal, vertical, square]
 
 slots :: SBoard -> SSlots
-slots = unify . streamMap
+slots = flip takenless =<< unify . streamMap
 
 streams :: Board a -> Line (Board a)
 streams b = map ($ b) [horizontals, verticals, squares]
