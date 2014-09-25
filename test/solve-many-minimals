@@ -1,0 +1,5 @@
+#!/bin/sh
+
+for i in {1..40}; do
+    ./main <<<"$(./data/1000-minimum-puzzles $i)"
+done
