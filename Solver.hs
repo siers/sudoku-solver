@@ -5,8 +5,6 @@ import Data.List
 import Data.List.Split
 import Control.Arrow
 import Control.Monad
-import Control.Monad.Logic
-import Control.Monad.Logic.Class
 import Sudoku
 
 frequency :: Ord a => Line a -> Line (Int, a)
@@ -38,7 +36,7 @@ choices 1 = map return . nub . concatMap trivialities . streams . cells . slots
 choices x = filter ((== x) . length) . concat . mapB downpointer . cells . slots
     where downpointer (p, l) = zip (repeat p) l
 
-deductions :: MonadLogic m => SBoard -> m SPoint
+deductions :: SBoard -> [SPoint]
 deductions = validity =<< body
     where
         offer        = msum . fmap return . concat . take 1
@@ -50,11 +48,11 @@ deductions = validity =<< body
             then mzero
             else choices
 
-guessOnce :: (MonadLogic m, Functor m) => SBoard -> m SBoard
+guessOnce :: SBoard -> [SBoard]
 guessOnce = deductions >>= flip (fmap . implement)
 
-guess :: (MonadLogic m, Functor m) => SBoard -> m SBoard
-guess b = guessOnce b >>- (\b -> if unfinished b then guess b else return b)
+guess :: SBoard -> [SBoard]
+guess b = guessOnce b >>= (\b -> if unfinished b then guess b else return b)
     where unfinished = (0 `elem`) . concat
 
-solve = observe . guess
+solve = head . guess
