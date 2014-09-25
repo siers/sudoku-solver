@@ -1,12 +1,6 @@
 import System.Environment
-import Control.Arrow
 import Sudoku
 import Solver
 
-representLog :: ([Point Int], SBoard) -> String
-representLog (p, b) = show p ++ "\n" ++ showB b ++ "\n"
-
 -- ./main < sudoku
-main'  = mapM (putStrLn . representLog) . solve'  . (,) [] . boardS =<< getContents
-main'' = putStrLn . showB . solve'' . boardS =<< getContents
-main   = main''
+main = putStrLn . showB . solve . boardS =<< getContents

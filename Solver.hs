@@ -50,26 +50,6 @@ deductions = validity =<< body
             then mzero
             else choices
 
-trivialized :: SBoard -> [Point Int]
-trivialized = deductions
-
-logTrivialize :: ([Point Int], SBoard) -> ([Point Int], SBoard)
-logTrivialize (_, b) =
-    if length (trivialized b) /= 0
-    then (trivialized $ b, implement b . head . trivialized $ b)
-    else ([], b)
-
-trivialize :: SBoard -> SBoard
-trivialize = snd . curry logTrivialize undefined
-
-converge :: Eq a => (a -> a) -> a -> a
-converge = until =<< ((==) =<<)
-
-convergerate :: Eq a => (a -> a) -> a -> [a]
-convergerate f i = (takeWhile (/= (converge f i)) $ iterate f i) ++ [converge f i]
-
-solve' = convergerate logTrivialize
-
 guessOnce :: (MonadLogic m, Functor m) => SBoard -> m SBoard
 guessOnce = deductions >>= flip (fmap . implement)
 
@@ -77,6 +57,4 @@ guess :: (MonadLogic m, Functor m) => SBoard -> m SBoard
 guess b = guessOnce b >>- (\b -> if unfinished b then guess b else return b)
     where unfinished = (0 `elem`) . concat
 
-solve'' = observe . guess
-
-solve = solve''
+solve = observe . guess
