@@ -1,18 +1,35 @@
 - sudoku solver
-    I tried to make one in delphi when I was little, only got enough
-    courage, skill and mind to do it. In delphi, I was having hard
-    time reasoning about code as well and I also didn't have haskell
-    by my side, so I failed.
+    I tried to make one in delphi when I was little, got enough courage, skill
+    and mind to do it only now. In delphi, I was having hard time reasoning
+    about code as well and I also didn't have haskell by my side, so I failed.
+    Pascal's got just too much clutter.
 
 - description
-    It first picks the numbers that are deterministically known, by
+    It first picks the numbers that are deterministically known to be valid, by
     looking at what's in the lines and square.
 
-    After that it backtracks through the puzzle, printing the first
-    good result.
+    For each square s at t,
+        valid numbers are [1..9]
+            \setminus
+        map [$ horizontal, $ vertical, $ square] (board, t)
+
+    (as found in the last section of Sudoku.hs)
+
+    After that it backtracks through the puzzle, printing the first good result.
 
 - example
-    % ./main < data/test4
+    % cat < data/test4; echo
+    2 0 8 0 0 0 6 5 0
+    0 0 3 5 0 8 0 0 0
+    0 0 0 0 0 6 0 0 2
+    0 0 5 0 0 0 0 9 0
+    0 8 0 4 0 7 0 3 0
+    0 4 0 0 0 0 8 0 0
+    4 0 0 6 0 0 0 0 0
+    0 0 0 1 0 9 2 0 0
+    0 3 1 0 0 0 7 0 5
+
+    % time ./main < data/test4
     2 1 8 7 3 4 6 5 9
     6 9 3 5 2 8 1 7 4
     5 7 4 9 1 6 3 8 2
@@ -22,6 +39,15 @@
     4 2 7 6 5 3 9 1 8
     8 5 6 1 7 9 2 4 3
     9 3 1 8 4 2 7 6 5
+
+    real    0m0.026s
+    user    0m0.017s
+    sys     0m0.000s
+
+- building
+    I don't have a clean machine to test this with, but
+    I'm pretty sure you can build this thing with
+        cabal build or cabal install (--only-dependencies) or both.
 
 - license
     MIT
