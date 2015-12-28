@@ -21,7 +21,7 @@ trivialities = concatMap targets . align
     where
         align           = zip =<< simples
         simples         = map (uniq . map snd)
-        sample          = find (not . null . snd) . return
+        sample          = find (not . null . snd) . (return :: a -> [a])
         allowed uniques = map (second (intersect uniques))
         targets         = catMaybes . map (fmap (second head) . sample) . uncurry allowed
 
