@@ -48,11 +48,11 @@ deductions = validity =<< body
             then mzero
             else choices
 
-guessOnce :: SBoard -> [SBoard]
-guessOnce = deductions >>= flip (fmap . implement)
-
 guess :: SBoard -> [SBoard]
-guess b = guessOnce b >>= (\b -> if unfinished b then guess b else return b)
+guess = deductions >>= flip (fmap . implement)
+
+solutions :: SBoard -> [SBoard]
+solutions b = guess b >>= (\b -> if unfinished b then solutions b else return b)
     where unfinished = (0 `elem`) . concat
 
-solve = head . guess
+solve = head . solutions
