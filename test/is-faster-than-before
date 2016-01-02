@@ -1,0 +1,3 @@
+#!/bin/sh
+
+time sh -c "cat $(find | grep solve-many-minimals) | sed 's/40/5/' | sh"
